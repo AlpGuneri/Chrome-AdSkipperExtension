@@ -1,0 +1,16 @@
+{
+    "name": "Chrome AdSkipper",
+    "description": "Skips youtube ads automatically",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["http://www.youtube.com/*", "https://www.youtube.com/*"],
+            "run_at": "document_idle",
+            "js":["adSkipper.js"]
+        }
+    ]
+}
