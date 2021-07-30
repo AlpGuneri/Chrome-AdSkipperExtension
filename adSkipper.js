@@ -1,49 +1,98 @@
 // Denotes skipping mode, could be auto, manual, or off. Auto means automatic skipping, manual makes skip ad button appear instantly
 // off means the extension will not alter the browsing experience at all.
-let skippingMode = 'auto';
-
-// Ad module is where the image and video ads are played. The ad module will be listened for
-// added children nodes (these are how ads are played), and the required logic to skip ads can be executed.
-let adModule = document.getElementsByClassName("video-ads ytp-ad-module")[0];
-
-// The mutation observer will execute required logic to skip ads, depending on their type and the skipping mode chosen by user.
-var mutationObserver = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-        if (mutation.type === 'childList') {
-            let added = mutation.addedNodes;
-            if (added.length > 0) {
-                let firstAddedChild = added[0];
-                if (firstAddedChild.className === 'ytp-ad-player-overlay') {
-                    if (skippingMode === 'auto') {
-                        let adSkipButton = document.getElementsByClassName("ytp-ad-skip-button ytp-button")[0];
-                        adSkipButton.click();
-                    } else if (skippingMode === 'manual') {
-                        let adSkipButton = document.getElementsByClassName("ytp-ad-skip-button-slot")[0];
-                        adSkipButton.removeAttribute("style");
-                        adSkipButton.children[0].removeAttribute("style");
-                        let adPreviewSlot = document.getElementsByClassName("ytp-ad-preview-slot")[0];
-                        adPreviewSlot.parentNode.removeChild(y);
-                    }
-                } else if (firstAddedChild.className === 'ytp-ad-overlay-ad-info-dialog-container') {
-                    if (skippingMode === 'auto' || skippingMode === 'manual') {
-                        let closeButton = document.getElementsByClassName('ytp-ad-overlay-close-button')[0];
-                        closeButton.click();
-                    }
-                }
-            } else {
-                console.log('Skipped');
-            }
-        } 
-    });
+let skipMode;
+chrome.storage.sync.get("skippingMode", (data) => {
+    skipMode = data.skippingMode;
 });
 
-// This options object specificies which mutations the observer should listen to (in this case, added children).
-let options = {
-    subtree = false,
-    childList = true,
-    attributes = false,
-    attributeOldValue = false,
-    characterData = false,
-    characterDataOldValue = false
+// This code contains the logic to skip ads
+
+let injectCode = function() {
+    // Ad module is where the image and video ads are played. The ad module will be listened for
+    // added children nodes (these are how ads are played), and the required logic to skip ads can be executed.
+    let adModule = document.getElementsByClassName("video-ads ytp-ad-module")[0];
+
+    let autoSkip = function() {
+        let adSkipButton = document.getElementsByClassName("ytp-ad-skip-button ytp-button")[0];
+        if (adSkipButton) {
+            adSkipButton.click();
+            console.log('Auto skipped ad');
+        }
+    }
+
+    let manualSkip = function() {
+        let adSkipButton = document.getElementsByClassName("ytp-ad-skip-button-slot")[0];
+        if (adSkipButton) {
+            adSkipButton.removeAttribute("style");
+            adSkipButton.children[0].removeAttribute("style");
+            let adPreviewSlot = document.getElementsByClassName("ytp-ad-preview-slot")[0];
+            adPreviewSlot.parentNode.removeChild(y);
+            console.log('Manual skipped ad');
+        }    
+    }
+
+    let closePopUp = function() {
+        if (skipMode === 'auto' || skipMode === 'manual') {
+            let closeButton = document.getElementsByClassName('ytp-ad-overlay-close-button')[0];
+            if (closeButton) {
+                closeButton.click();
+                console.log('Closed pop-up');
+            }
+        }
+    }
+
+    if(adModule.childElementCount > 0) {
+        if (skipMode !== 'off') {
+            autoSkip();
+            manualSkip();
+            closePopUp();
+        }
+    }
+    
+    // This mutation observer will execute required logic to skip ads, depending on their type and the skipping mode chosen by user.
+    let adModuleMutationObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                let added = mutation.addedNodes;
+                if (added.length > 0) {
+                    let firstAddedChild = added[0];
+                    if (firstAddedChild.className === 'ytp-ad-player-overlay') {
+                        if (skipMode === 'auto') {
+                            autoSkip();
+                        } else if (skipMode === 'manual') {
+                            manualSkip();
+                        }
+                    } else if (firstAddedChild.className === 'ytp-ad-overlay-ad-info-dialog-container') {
+                        closePopUp();
+                    }
+                } 
+            } 
+        });
+    });
+
+    // This lets us observe the adModule for added and removed children nodes, and deal with the mutations with the logic above.
+
+    adModuleMutationObserver.observe(adModule, {childList: true});
 }
-mutationObserver.observe(adModule, options);
+
+// Since youtube uses ajax instead of redirects, the script will be tried to be injected not onto the home page, and not onto
+// the videos that are clicked, since a new document is not fetched, the original document and url are just altered.
+// This will cause failure, since the ads module is not present at home page. Thus, a mutation listener must be added
+// to this DOM element to detect if the user is at home page or watching a video, and thus inject the script.
+
+let ytApp = document.querySelector('ytd-app');
+
+// Function for checking if the user is on home page.
+let atHomePage = function() {
+    let url = window.location.toString();
+    if (url === 'http://www.youtube.com/' || url === 'https://www.youtube.com/') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+if (!atHomePage()) {
+    injectCode();
+    console.log('injecting code');
+}
