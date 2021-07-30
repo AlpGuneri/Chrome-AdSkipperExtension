@@ -95,4 +95,17 @@ let atHomePage = function() {
 if (!atHomePage()) {
     injectCode();
     console.log('injecting code');
+} else {
+    let videoSelected = document.querySelector('video');
+    let pageObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (videoSelected['src']) {
+                injectCode();
+                console.log('injecting code');
+                pageObserver.disconnect();
+            }        
+        });
+    });
+
+    pageObserver.observe(videoSelected, {attributeFilter: ['src']})
 }
