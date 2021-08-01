@@ -4,7 +4,6 @@ let skipMode;
 chrome.storage.sync.get("skippingMode", (data) => {
     skipMode = data.skippingMode;
 });
-
 // This code contains the logic to skip ads
 
 let injectCode = function() {
@@ -29,7 +28,7 @@ let injectCode = function() {
             adSkipButton.removeAttribute("style");
             adSkipButton.children[0].removeAttribute("style");
             let adPreviewSlot = document.getElementsByClassName("ytp-ad-preview-slot")[0];
-            adPreviewSlot.parentNode.removeChild(y);
+            adPreviewSlot.parentNode.removeChild(adPreviewSlot);
             console.log('Manual skipped ad');
         }    
     }
@@ -117,7 +116,6 @@ let main = function(videoPlayer) {
 
     if (!atHomePage()) {
         injectCode();
-        console.log('injecting code');
     } else {
         let pageObserver = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -127,7 +125,6 @@ let main = function(videoPlayer) {
                         for (let i = 0; i < added.length; i++) {
                             if (added[i].className === 'video-ads ytp-ad-module') {
                                 injectCode();
-                                console.log('injecting code');
                                 pageObserver.disconnect();
                             }
                         }
