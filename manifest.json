@@ -14,8 +14,6 @@
             "js":["adSkipper.js"]
         }
     ],
-    "permissions": [
-        "storage",
-        "tabs"
-    ]
+    "permissions": ["storage", "tabs"],
+    "options_page": "options.html"
 }
