@@ -17,6 +17,9 @@ let injectCode = function() {
         if (adSkipButton) {
             adSkipButton.click();
             console.log('Auto skipped ad');
+        } else {
+            let x = document.getElementsByClassName("ytp-ad-button ytp-ad-feedback-dialog-close-button ytp-ad-button-link")[0];
+            x.click();
         }
     }
 
@@ -43,8 +46,11 @@ let injectCode = function() {
 
     if(adModule.childElementCount > 0) {
         if (skipMode !== 'off') {
-            autoSkip();
-            manualSkip();
+            if (skipMode === 'auto') {
+                autoSkip();
+            } else {
+                manualSkip();
+            }    
             closePopUp();
         }
     }
@@ -75,37 +81,60 @@ let injectCode = function() {
     adModuleMutationObserver.observe(adModule, {childList: true});
 }
 
+
 // Since youtube uses ajax instead of redirects, the script will be tried to be injected not onto the home page, and not onto
 // the videos that are clicked, since a new document is not fetched, the original document and url are just altered.
 // This will cause failure, since the ads module is not present at home page. Thus, a mutation listener must be added
 // to this DOM element to detect if the user is at home page or watching a video, and thus inject the script.
+// An interval is set to check if html5 video player is rendered, so that it is not null.
 
-let ytApp = document.querySelector('ytd-app');
-
-// Function for checking if the user is on home page.
-let atHomePage = function() {
-    let url = window.location.toString();
-    if (url === 'http://www.youtube.com/' || url === 'https://www.youtube.com/') {
-        return true;
-    } else {
-        return false;
+let checkPlayer = function() {
+    let videoPlayer = document.querySelector('.html5-video-player');
+    if (videoPlayer !== null) {
+        clearInterval(videoPlayerTimer);
+        main(videoPlayer);
     }
 }
 
-if (!atHomePage()) {
-    injectCode();
-    console.log('injecting code');
-} else {
-    let videoSelected = document.querySelector('video');
-    let pageObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (videoSelected['src']) {
-                injectCode();
-                console.log('injecting code');
-                pageObserver.disconnect();
-            }        
-        });
-    });
+let videoPlayerTimer = setInterval(checkPlayer, 100);
 
-    pageObserver.observe(videoSelected, {attributeFilter: ['src']})
-}
+// This piece of code detects if we are at homepage or at a video. If we are at a video, the script can be injected.
+// If we are at homepage, the script has to wait until a video is opened to be injected, since the ad element isn't present at homepage.
+// All of this logic is put in a function since it must be fired after the window is loaded, or the html5-video-player will
+// be perceived as null by the script. That's not what we want.
+
+let main = function(videoPlayer) {
+
+    // Function for checking if the user is on home page.
+    let atHomePage = function() {
+        let url = window.location.toString();
+        if (url === 'http://www.youtube.com/' || url === 'https://www.youtube.com/') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if (!atHomePage()) {
+        injectCode();
+        console.log('injecting code');
+    } else {
+        let pageObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    let added = mutation.addedNodes;
+                    if (added.length > 0) {
+                        for (let i = 0; i < added.length; i++) {
+                            if (added[i].className === 'video-ads ytp-ad-module') {
+                                injectCode();
+                                console.log('injecting code');
+                                pageObserver.disconnect();
+                            }
+                        }
+                    }
+                }       
+            });
+        });
+        pageObserver.observe(videoPlayer, {childList: true})
+    }
+}    
