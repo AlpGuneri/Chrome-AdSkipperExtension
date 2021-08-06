@@ -22,23 +22,25 @@ Or you can simply choose not to skip. There's an option for that as well...
 
 * It offers you an option to skip manually, unlike other adskippers which skip automatically
 
-* It has a pretty UI (doesn't work yet :c)
+* It has a pretty UI
 
 ## How to use this extension
 
-There are two ways to use this extension. You can download it on chrome store (not yet :c).
+You can clone this project into a directory and tell chrome to use that directory's files as an extension. How to do that?
 
-If you want to turn this source code into an extension yourself, you can clone this project into a directory and tell chrome to use that directory's files as an extension. How to do that?
+* Step 1: Open git bash or any application you use for git, as long as you can clone this project.
 
-* Step 1: Open git bash or any application you use for git
+* Step 2: Make a directory (folder) to clone this project into.
 
-* Step 2: Move into the directory you want to clone this project into. You can use cd "file-path-here"
+* Step 3: Move into the directory you created. You can use cd "file-path-here"
 
-* Step 3: Use git clone https://github.com/Meegumi/Chrome-AdSkipperExtension.git
+* Step 4: Type "git clone https://github.com/Meegumi/Chrome-AdSkipperExtension.git"
 
-* Step 4: Open chrome and type chrome://extensions
+* Step 5: Open chrome and type "chrome://extensions"
 
-* Step 5: Turn the developer mode on if it is off.
+* Step 6: Turn the developer mode on if it is off. Hint: It's on top right corner ^^.
 
-* Step 6: Click on load unpacked and navigate to the directory you cloned the project into. 
+* Step 7: Click on load unpacked and select the directory you cloned the project into.
+
+* Step 8: Enjoy the extension :). This step is strictly necessary.
 

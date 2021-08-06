@@ -4,6 +4,14 @@ let skipMode;
 chrome.storage.sync.get("skippingMode", (data) => {
     skipMode = data.skippingMode;
 });
+
+// When the user changes the skipping mode from UI, detect the updated mode.
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.skippingMode?.newValue) {
+      skipMode = changes.skippingMode.newValue;
+    }
+});
+
 // This code contains the logic to skip ads
 
 let injectCode = function() {
@@ -30,6 +38,8 @@ let injectCode = function() {
             let adPreviewSlot = document.getElementsByClassName("ytp-ad-preview-slot")[0];
             adPreviewSlot.parentNode.removeChild(adPreviewSlot);
             console.log('Manual skipped ad');
+        } else {
+            autoSkip();
         }    
     }
 
