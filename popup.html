@@ -8,11 +8,11 @@
 
     <body>
         <p id = 'debug'></p> 
-        <p class = "switch-info"> AdSkipper is currently turned </p>
+        <p class = "switch-info"> AdSkipper is currently turned off. </p>
         <div class = 'switch-container'>
             <label class="switch" id='switch'>
                 <span class='toggleOptionLeft'>Off</span>
-                <input type="checkbox" id = 'toggle-switch' status='on'>
+                <input type="checkbox" id = 'toggle-switch'>
                 <span class="slider round"></span>
                 <span class='toggleOptionRight'>On</span>  
             </label>
@@ -20,12 +20,12 @@
         <div class = 'skip-switch-container'>
             <label class="switch" id='skip-switch'>
                 <span class='toggleSkipOptionLeft'>Manual</span>
-                <input type="checkbox" id = 'toggle-skip-switch' status='on'>
+                <input type="checkbox" id = 'toggle-skip-switch'>
                 <span class="slider round"></span>
                 <span class='toggleSkipOptionRight'>Automatic</span>  
             </label>
         </div>            
         <p class = "skip-info"></p>
-        <script defer src="popup.js"></script>
+        <script src="popup.js"></script>
     </body>
 </html>
