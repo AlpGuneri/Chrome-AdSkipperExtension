@@ -18,5 +18,11 @@
     "options_page": "options.html",
     "action": {
         "default_popup": "popup.html"
-    }
+    },
+    "icons": {
+        "16": "AdSkipper16.png",
+        "32": "AdSkipper32.png",
+        "48": "AdSkipper48.png",
+        "128": "AdSkipper128.png"
+      }
 }
